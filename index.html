@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Accounting Portfolio Builder | AI-Powered</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --ink: #0f1117;
+    --paper: #f7f6f2;
+    --mid: #e8e5dc;
+    --muted: #8a8578;
+    --accent: #1a4fd6;
+    --accent-light: #e8eeff;
+    --warn: #b34a00;
+    --success: #1a7a4a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    border-bottom: 2px solid var(--ink);
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--paper);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .header-left { display: flex; align-items: baseline; gap: 10px; }
+
+  header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.4rem;
+  }
+
+  header .badge {
+    font-size: 0.68rem;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .key-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    border: 1.5px solid var(--mid);
+    border-radius: 8px;
+    padding: 7px 12px;
+    transition: border-color 0.15s;
+  }
+  .key-box:focus-within { border-color: var(--accent); }
+  .key-box label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .key-box input {
+    border: none;
+    outline: none;
+    font-size: 0.82rem;
+    font-family: 'DM Mono', monospace;
+    width: 220px;
+    background: transparent;
+    color: var(--ink);
+  }
+  .key-status {
+    font-size: 0.7rem;
+    font-family: 'DM Mono', monospace;
+    white-space: nowrap;
+  }
+  .key-status.saved { color: var(--success); }
+  .key-status.empty { color: var(--warn); }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    border-bottom: 1.5px solid var(--mid);
+    padding: 0 24px;
+    background: var(--paper);
+  }
+  .tab {
+    padding: 11px 18px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2.5px solid transparent;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .tab.active { color: var(--ink); border-bottom-color: var(--ink); }
+  .tab:hover:not(.active) { color: var(--ink); }
+
+  /* VIEWS */
+  .view { display: none; padding: 28px 24px; max-width: 720px; margin: 0 auto; }
+  .view.active { display: block; }
+
+  /* FORM */
+  .section-heading {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.1rem;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--mid);
+  }
+  .form-group { margin-bottom: 16px; }
+  label.field-label {
+    display: block;
+    font-size: 0.71rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--muted);
+    margin-bottom: 5px;
+  }
+  input.field, textarea.field, select.field {
+    width: 100%;
+    background: #fff;
+    border: 1.5px solid var(--mid);
+    border-radius: 6px;
+    padding: 9px 11px;
+    font-size: 0.87rem;
+    font-family: 'Inter', sans-serif;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  input.field:focus, textarea.field:focus, select.field:focus { border-color: var(--accent); }
+  textarea.field { resize: vertical; min-height: 80px; line-height: 1.6; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 500px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* TYPE CARDS */
+  .type-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  @media (max-width: 500px) { .type-grid { grid-template-columns: 1fr; } }
+  .type-card {
+    padding: 12px 14px;
+    border: 1.5px solid var(--mid);
+    border-radius: 8px;
+    cursor: pointer;
+    background: #fff;
+    transition: all 0.15s;
+    text-align: left;
+  }
+  .type-card:hover { border-color: var(--accent); }
+  .type-card.selected { border-color: var(--accent); background: var(--accent-light); }
+  .type-card-title { font-size: 0.84rem; font-weight: 600; margin-bottom: 2px; }
+  .type-card.selected .type-card-title { color: var(--accent); }
+  .type-card-desc { font-size: 0.74rem; color: var(--muted); }
+
+  /* INFO BOX */
+  .info-box {
+    background: var(--accent-light);
+    border-left: 3px solid var(--accent);
+    padding: 11px 14px;
+    font-size: 0.82rem;
+    color: var(--accent);
+    border-radius: 0 6px 6px 0;
+    margin-bottom: 22px;
+    line-height: 1.55;
+  }
+
+  /* BUTTONS */
+  .btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 10px 22px; border-radius: 6px;
+    font-size: 0.85rem; font-weight: 600;
+    cursor: pointer; border: none;
+    transition: all 0.15s;
+    font-family: 'Inter', sans-serif;
+  }
+  .btn-primary { background: var(--ink); color: #fff; }
+  .btn-primary:hover:not(:disabled) { background: var(--accent); }
+  .btn-primary:disabled { background: var(--muted); cursor: not-allowed; }
+  .btn-ghost {
+    background: transparent; color: var(--ink);
+    border: 1.5px solid var(--mid); padding: 6px 14px; font-size: 0.78rem;
+  }
+  .btn-ghost:hover { border-color: var(--ink); }
+  .btn-row { display: flex; gap: 10px; margin-top: 6px; flex-wrap: wrap; }
+
+  /* SPINNER */
+  .spinner {
+    width: 13px; height: 13px;
+    border: 2px solid rgba(255,255,255,0.35);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: inline-block;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* OUTPUT */
+  .output-wrap { margin-top: 22px; }
+  .output-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 8px;
+  }
+  .output-label {
+    font-size: 0.71rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted);
+  }
+  .output-box {
+    background: #fff;
+    border: 1.5px solid var(--mid);
+    border-radius: 8px;
+    padding: 20px;
+    min-height: 110px;
+    font-size: 0.88rem;
+    line-height: 1.75;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .output-empty {
+    color: var(--muted); font-style: italic;
+    display: flex; align-items: center; justify-content: center;
+    text-align: center;
+  }
+  .output-error { color: var(--warn); }
+
+  .divider { height: 1px; background: var(--mid); margin: 22px 0; }
+
+  /* COPY TOAST */
+  #copy-toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--ink); color: #fff;
+    padding: 9px 16px; border-radius: 6px;
+    font-size: 0.82rem; font-weight: 500;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s;
+    z-index: 100;
+  }
+  #copy-toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1>Portfolio Builder</h1>
+    <span class="badge">Accounting · AI-Powered</span>
+  </div>
+  <div class="key-box">
+    <label for="gemini-key">🔑 Gemini Key</label>
+    <input type="password" id="gemini-key" placeholder="AIzaSy..." oninput="saveKey()">
+    <span class="key-status empty" id="key-status">not set</span>
+  </div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('profile')">My Profile</div>
+  <div class="tab" onclick="switchTab('generate')">AI Generator</div>
+</div>
+
+<!-- PROFILE TAB -->
+<div class="view active" id="tab-profile">
+  <h2 class="section-heading">Your Background</h2>
+  <div class="two-col">
+    <div class="form-group">
+      <label class="field-label">Full Name</label>
+      <input type="text" class="field" id="name" value="Tanushree Acharya" oninput="saveProfile()">
+    </div>
+    <div class="form-group">
+      <label class="field-label">Education</label>
+      <input type="text" class="field" id="education" value="SYBCom at Symbiosis College of Arts and Commerce" oninput="saveProfile()">
+    </div>
+  </div>
+  <div class="two-col">
+    <div class="form-group">
+      <label class="field-label">Current Role / Status</label>
+      <input type="text" class="field" id="role" value="CPA Aspirant" oninput="saveProfile()">
+    </div>
+    <div class="form-group">
+      <label class="field-label">Target / Goal</label>
+      <input type="text" class="field" id="goal" value="Targeting 15 Lakh p.a. Package" oninput="saveProfile()">
+    </div>
+  </div>
+  <div class="form-group">
+    <label class="field-label">Skills, Specializations & Projects</label>
+    <textarea class="field" id="skills" oninput="saveProfile()">Financial auditing, Pricing decision strategies, Business research, Extracurricular leadership (AIPPM Delegate)</textarea>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="switchTab('generate')">Next: Generate Content →</button>
+  </div>
+</div>
+
+<!-- GENERATE TAB -->
+<div class="view" id="tab-generate">
+  <div class="info-box">
+    🤖 Gemini will write portfolio content based on your profile. Paste your free Gemini key in the top right — it's saved automatically so you only do this once.
+  </div>
+
+  <h2 class="section-heading">What to Generate</h2>
+
+  <div class="type-grid">
+    <div class="type-card selected" onclick="selectType('summary', this)">
+      <div class="type-card-title">Professional Summary</div>
+      <div class="type-card-desc">Portfolio header / hero bio</div>
+    </div>
+    <div class="type-card" onclick="selectType('linkedin', this)">
+      <div class="type-card-title">LinkedIn About</div>
+      <div class="type-card-desc">150–180 word profile section</div>
+    </div>
+    <div class="type-card" onclick="selectType('cover', this)">
+      <div class="type-card-title">Cover Letter Opening</div>
+      <div class="type-card-desc">First paragraph that differentiates you</div>
+    </div>
+    <div class="type-card" onclick="selectType('bullet', this)">
+      <div class="type-card-title">Resume Bullet Points</div>
+      <div class="type-card-desc">5 achievement-based bullets</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="form-group">
+    <label class="field-label">Additional Context <span style="font-weight:400;text-transform:none;font-size:0.75rem;color:var(--muted)">(optional)</span></label>
+    <textarea class="field" id="gen-context" placeholder="E.g. 'Make it sound ambitious' or 'Focus on my college projects'…" style="min-height:60px;"></textarea>
+  </div>
+
+  <button class="btn btn-primary" id="gen-btn" onclick="generateContent()">
+    ✦ Generate with Gemini
+  </button>
+
+  <div class="output-wrap">
+    <div class="output-header">
+      <span class="output-label" id="output-label">Output</span>
+      <button class="btn btn-ghost" id="copy-btn" style="display:none" onclick="copyOutput()">Copy</button>
+    </div>
+    <div class="output-box output-empty" id="output">Your AI-generated content will appear here.</div>
+  </div>
+</div>
+
+<div id="copy-toast">✓ Copied to clipboard</div>
+
+<script>
+  let profile = {};
+  let selectedType = 'summary';
+
+  const TYPE_MAP = {
+    summary: 'a concise, compelling professional summary (3-4 sentences). Lead with their ambition, highlight their ongoing education and projects, and end with their target goal. No fluff.',
+    linkedin: "a LinkedIn 'About' section (150-180 words). Professional but highly motivated voice. Focus on what drives them as a student and aspiring professional.",
+    cover: 'a powerful cover letter opening paragraph (80-100 words) that immediately differentiates them based on their academic and project background.',
+    bullet: '5 highly professional, achievement-based resume bullet points tailored for an entry-level or internship role.'
+  };
+
+  // Load saved key
+  window.addEventListener('DOMContentLoaded', () => {
+    const savedKey = localStorage.getItem('gemini_api_key');
+    if (savedKey) {
+      document.getElementById('gemini-key').value = savedKey;
+      setKeyStatus(true);
+    }
+    loadProfile();
+  });
+
+  function saveKey() {
+    const key = document.getElementById('gemini-key').value.trim();
+    if (key) {
+      localStorage.setItem('gemini_api_key', key);
+      setKeyStatus(true);
+    } else {
+      localStorage.removeItem('gemini_api_key');
+      setKeyStatus(false);
+    }
+  }
+
+  function setKeyStatus(saved) {
+    const el = document.getElementById('key-status');
+    el.textContent = saved ? '✓ saved' : 'not set';
+    el.className = 'key-status ' + (saved ? 'saved' : 'empty');
+  }
+
+  function saveProfile() {
+    profile = {
+      name: document.getElementById('name').value,
+      education: document.getElementById('education').value,
+      role: document.getElementById('role').value,
+      goal: document.getElementById('goal').value,
+      skills: document.getElementById('skills').value,
+    };
+    localStorage.setItem('portfolio_profile', JSON.stringify(profile));
+  }
+
+  function loadProfile() {
+    const saved = localStorage.getItem('portfolio_profile');
+    if (saved) {
+      const p = JSON.parse(saved);
+      if (p.name) document.getElementById('name').value = p.name;
+      if (p.education) document.getElementById('education').value = p.education;
+      if (p.role) document.getElementById('role').value = p.role;
+      if (p.goal) document.getElementById('goal').value = p.goal;
+      if (p.skills) document.getElementById('skills').value = p.skills;
+    }
+    saveProfile();
+  }
+
+  function switchTab(id) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+    const tabs = ['profile', 'generate'];
+    document.querySelectorAll('.tab')[tabs.indexOf(id)].classList.add('active');
+  }
+
+  function selectType(type, el) {
+    selectedType = type;
+    document.querySelectorAll('.type-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+
+  async function generateContent() {
+    saveProfile();
+
+    const apiKey = document.getElementById('gemini-key').value.trim();
+    if (!apiKey) {
+      alert('Please paste your Gemini API key in the top right first.\n\nGet a free key at: aistudio.google.com');
+      return;
+    }
+
+    const extra = document.getElementById('gen-context').value;
+    const profileCtx = `Name: ${profile.name}\nEducation: ${profile.education}\nRole: ${profile.role}\nGoal: ${profile.goal}\nSkills & Projects: ${profile.skills}`;
+
+    const prompt = `You are an expert career coach writing for an aspiring accounting professional.
+
+Profile:
+${profileCtx}
+${extra ? '\nAdditional context: ' + extra : ''}
+
+Task: Generate ${TYPE_MAP[selectedType]}
+Write in first person where appropriate. Use plain text only — no markdown asterisks, no backticks. Use line breaks for spacing. Be specific, compelling, and professional.`;
+
+    const btn = document.getElementById('gen-btn');
+    const outputEl = document.getElementById('output');
+    const copyBtn = document.getElementById('copy-btn');
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Generating…';
+    outputEl.className = 'output-box';
+    outputEl.textContent = '';
+    copyBtn.style.display = 'none';
+
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error?.message || 'API request failed. Check your key and try again.');
+
+      const text = data.candidates[0].content.parts[0].text
+        .replace(/\*\*(.*?)\*\*/g, '$1')
+        .replace(/\*(.*?)\*/g, '$1')
+        .trim();
+
+      outputEl.textContent = text;
+      outputEl.className = 'output-box';
+
+      const typeLabels = { summary: 'Professional Summary', linkedin: 'LinkedIn About', cover: 'Cover Letter Opening', bullet: 'Resume Bullets' };
+      document.getElementById('output-label').textContent = typeLabels[selectedType];
+      copyBtn.style.display = 'inline-flex';
+
+    } catch (e) {
+      outputEl.className = 'output-box output-empty';
+      outputEl.innerHTML = `<span class="output-error">⚠ ${e.message}</span>`;
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '✦ Generate with Gemini';
+    }
+  }
+
+  function copyOutput() {
+    const text = document.getElementById('output').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const toast = document.getElementById('copy-toast');
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    });
+  }
+</script>
+</body>
+</html>
